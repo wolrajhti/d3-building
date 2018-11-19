@@ -1,0 +1,153 @@
+<div id="chart"></div>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://d3js.org/d3-scale.v2.min.js"></script>
+<!-- <script src="https://d3js.org/d3-dsv.v1.min.js"></script> -->
+<script src="https://d3js.org/d3-fetch.v1.min.js"></script>
+<style>
+  @import url("/style.css");
+  @import url("/syntax.css");
+  @import url("/population.css");
+</style>
+<script>
+  var w = 960,
+      h = 500,
+      x = d3.scaleLinear().range([0, w]),
+      y = d3.scaleLinear().range([0, h]);
+
+  // An SVG element with a bottom-right origin.
+  var svg = d3.select("#chart").append("svg:svg")
+      .attr("width", w)
+      .attr("height", h + 100)
+    .append("svg:g");
+
+  // A hatchPattern filling rects
+  var hatchPattern = svg.append("svg:pattern")
+      .attr("id", "diagonalHatch")
+      .attr("patternUnits", "userSpaceOnUse")
+      .attr("width", 4)
+      .attr("height", 4)
+    .append("path")
+      .attr("d", "M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2")
+      .style("stroke", "black")
+      .style("stroke-width", "1");
+
+  // A sliding container to hold the bars.
+  var body = svg.append("svg:g");
+
+  // Data
+  var data = [];
+
+  for (var i = 0; i < 75; ++i) {
+    data.push({
+      typo: ['bur', 'pc', 'lt'][Math.floor(3 * Math.random())],
+      level: ['RdC', 'SS1', 'R+1', 'R+2', 'R+3'][Math.floor(5 * Math.random())],
+      surface: Math.round(10 * Math.random(), 2)
+    });
+  }
+
+  data.sort((r1, r2) => r1.level.localeCompare(r2.level));
+  data.sort((r1, r2) => r1.typo.localeCompare(r2.typo));
+
+  data = data.reduce((levels, room) => {
+    var i = -1;
+    if (!~(i = levels.findIndex(level => level.name === room.level))) {
+      levels.push({
+        name: room.level,
+        rooms: [{
+          surface: room.surface,
+          typo: room.typo
+        }],
+        surface: 0
+      });
+      levels[levels.length - 1].surface += room.surface;
+    } else {
+      levels[i].rooms.push({
+        surface: room.surface,
+        typo: room.typo
+      });
+      levels[i].surface += room.surface;
+    }
+    return levels;
+  }, []);  
+  
+  // Compute the extent of the data set in SU and levels.
+  var SU = data.map(d => {
+    return d.rooms.reduce((sum, r) => sum + r.surface, 0);
+  });
+
+  var SUMax = d3.max(SU);
+  var levelCount = data.length;
+
+  // Update the scale domains.
+  x.domain([0, SUMax]);
+  y.domain([0, levelCount]);
+
+  GROUND = {};
+
+  // Add labeled rects for each level.
+  var levels = body.selectAll("g")
+      .data(data)
+    .enter().append("svg:g")
+      .attr("transform", function(d, i) {
+        if (d.name === 'SS1') {
+          GROUND.y = i;
+          GROUND.x = (SUMax - SU[i]) / 2;
+          GROUND.width = d.surface;
+        }
+        return "translate(" + x((SUMax - SU[i]) / 2) + "," + y(i) + ")";
+      });
+
+  levels.selectAll('rect')
+    .data(d => d.rooms.map(v => Object.assign(v, {parent: d})))
+  .enter().append('svg:rect')
+      .attr('x', (d, i) => {
+        var offset = 0;
+        for (var h = 0; h < i; ++h) {
+          offset += d.parent.rooms[h].surface;
+        }
+        return x(offset);
+      })
+      .attr('width', d => x(d.surface))
+      .attr('height', y(1))
+      .attr('class', d => d.typo);
+      // .attr('data-rvt-id', Math.random());
+
+  // A container to hold the y-axis rules.
+  var rules = svg.append("svg:g");
+
+  // Add rules to show the population values.
+  rules = rules.selectAll(".rule")
+    .data(data)
+  .enter().append("svg:g")
+    .attr("class", "rule")
+    .attr("transform", function(d, i) { return "translate(0," + y(i + 1) + ")"; });
+
+  rules.append("svg:line")
+      .attr('x1', 25)
+      .attr("x2", w - 25);
+
+  rules.append("svg:text")
+      .attr("x", 940)
+      .attr("dy", ".35em")
+      .text(d => d.name);
+
+  svg.append('svg:path')
+      .attr('d', `M ${x(0)} ${y(GROUND.y)}
+                  H ${x(GROUND.x)}
+                  V ${y(GROUND.y + 1)}
+                  H ${x(GROUND.width + GROUND.x)}
+                  V ${y(GROUND.y) }
+                  H ${w}
+                  V ${y(GROUND.y + 2)}
+                  H ${x(0)}
+                  Z`)
+      .style('fill', 'url(#diagonalHatch)');
+
+
+  document.querySelectorAll('rect').forEach(node => {
+    node.addEventListener('click', function() {
+      console.log(this.dataset['rvtId']);
+    });
+  });
+
+</script>

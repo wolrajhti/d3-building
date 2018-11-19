@@ -1,0 +1,37 @@
+svg {
+  font: 10px sans-serif;
+}
+
+text.title {
+  font: 300 78px Helvetica Neue;
+  fill: #666;
+}
+
+.rule line {
+  stroke: #000;
+  stroke-opacity: .2;
+  shape-rendering: crispEdges;
+}
+
+rect {
+  fill-opacity: .6;
+}
+
+.bur {
+  fill: #e377c2;
+}
+
+.pc {
+  fill: #1f77b4;
+}
+
+.lt {
+  fill: #7fb632;
+}
+
+path {
+  fill: none;
+  stroke-width: 3;
+  /* stroke-dasharray: 0cm; */
+  stroke: #000;
+}
