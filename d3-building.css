@@ -1,4 +1,4 @@
-.rule line {
+.level-line {
   stroke-width: 1px;
   stroke-opacity: 1;
   stroke-dasharray: 20 5 3 5;
@@ -7,25 +7,25 @@
   shape-rendering: crispEdges;
 }
 
-.rule rect {
+.level-label {
+  font: 15px sans-serif;
+  font-weight: 580;
+}
+
+.level-label-box {
   stroke-width: 1px;
   stroke: #000;
   shape-rendering: crispEdges;
   fill: none;
 }
 
-.rule text {
-  font: 15px sans-serif;
-  font-weight: 580;
-}
-
-rect {
+.room {
   fill-opacity: .6;
   stroke: #fff;
   stroke-width: 3px;
 }
 
-rect:hover {
+.room:hover {
   fill-opacity: .4;
 }
 
@@ -41,20 +41,19 @@ rect:hover {
   fill: #7fb632;
 }
 
-path.ground-cut {
+.ground-cut {
   fill: none;
   stroke-width: 3px;
   stroke: #000;
   stroke-linejoin: round;
 }
 
-path.ground-hatch {
+.ground-hatch {
   fill-opacity: .75;
   fill: url(#diagonalHatch);
 }
 
-path.underground-hatch {
+.underground-hatch {
   fill-opacity: .5;
-  /* fill: url(#diagonalHatch); */
   fill: #bbb;
 }
