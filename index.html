@@ -10,51 +10,83 @@
 </style>
 <script src="/data.js"></script>
 <script>
-  var w = 960,
-      h = 500,
-      x = d3.scaleLinear().range([0, 0.8 * w]).domain([0, surfaceMax]),
-      y = d3.scaleLinear().range([0, 0.8 * h]).domain([0, levelCount + 1]);
+  const w = 960;
+  const h = 500;
+  const x = d3.scaleLinear().range([0, 0.8 * w]).domain([0, surfaceMax]);
+  const y = d3.scaleLinear().range([0, 0.8 * h]).domain([0, levelCount + 1]);
+
+  const buildingOffsetX = .1 * w;
+  const buildingOffsetY = .1 * h;
+  const infraY = data.findIndex(d => d.name === 'RdC') + 1;
+  const infraWidth = data.filter((d, i) => i >= infraY)
+    .reduce((surfaceMaxInfra, level) => Math.max(surfaceMaxInfra, level.surface), 0);
+
+  const infraX = (surfaceMax - infraWidth) / 2;
+  const infraHeight = data.length - infraY;
 
   // An SVG element with a bottom-right origin.
-  var svg = d3.select('#chart').append('svg:svg')
+  var svg = d3.select('#chart')
+    .append('svg:svg')
       .attr('width', w)
-      .attr('height', h)
-    .append('svg:g');
+      .attr('height', h);
 
   // A sliding container to hold the bars.
-  var body = svg.append('svg:g')
-    .attr('transform', 'translate(' + .1 * w + ',' + .1 * h + ')');
+  var building = svg.append('svg:g')
+    .attr('transform', 'translate(' + buildingOffsetX + ',' + buildingOffsetY + ')')
+    .attr('id', 'building');
 
-  const GROUND = {};
+  var title = svg.append('svg:text')
+    .attr('x', buildingOffsetX + x(surfaceMax) / 2)
+    .attr('y', y(1) / 2)
+    .classed('project-name', true)
+    .text(projectName);
 
   // Add labeled rects for each level.
-  var levels = body.selectAll('g')
+  var levels = building.selectAll('g')
       .data(data)
     .enter().append('svg:g')
-      .attr('transform', function(d, i) {
-        if (d.name === 'SS1') {
-          GROUND.y = i;
-          GROUND.x = (surfaceMax - d.surface) / 2;
-          GROUND.width = d.surface;
-        }
-        return 'translate(' + x((surfaceMax - d.surface) / 2) + ',' + y(i) + ')';
-      });
+      .attr('transform', (d, i) => 'translate(' + x((surfaceMax - d.surface) / 2) + ',' + y(i) + ')');
 
-  levels.selectAll('rect')
+  var rooms = levels.selectAll('g')
     .data(d => d.rooms.map(v => Object.assign(v, {parent: d})))
-  .enter().append('svg:rect')
-      .attr('x', (d, i) => {
+  .enter().append('svg:g')
+      .attr('transform', (d, i) => {
         var offset = 0;
         for (var h = 0; h < i; ++h) {
           offset += d.parent.rooms[h].surface;
         }
-        return x(offset);
-      })
+        return 'translate(' + x(offset) + ',0)';
+      });
+
+  rooms.append('svg:rect')
       .attr('width', d => x(d.surface))
       .attr('height', y(1))
       .attr('class', d => d.typo)
       .classed('room', true)
       .attr('data-rvt-id', Math.random());
+
+  var roomLabels = rooms.append('svg:g')
+      .attr('transform', d => 'translate(' + (x(d.surface) / 2) + ',' + (y(1) / 2) + ')');
+  
+  roomLabels.append('svg:text')
+      .attr('dy', '-.5em')
+      .text(d => d.typo)
+      .style('display', function(d) {
+        if (this.getComputedTextLength() + 5 > x(d.surface)) {
+          return 'none';
+        }
+      })
+      .classed('room-label', true);
+
+  roomLabels.append('svg:text')
+      .attr('dy', '1em')
+      .html(d => d.surface + ' m<tspan baseline-shift="super">2</tspan>')
+      .style('display', function(d) {
+        if (this.getComputedTextLength() + 5 > x(d.surface)) {
+          return 'none';
+        }
+      })
+      .classed('room-surface', true);
 
   // ground hatches
 
@@ -70,48 +102,48 @@
       .style('stroke', 'black')
       .style('stroke-width', '1');
 
-  var offset = .025 * w;
+  var groundOffset = .025 * w;
   var paths = svg.append('svg:g')
-      .attr('transform', 'translate(' + (.1 * w - offset) + ',' + .1 * h + ')');
+      .attr('transform', 'translate(' + (buildingOffsetX - groundOffset) + ',' + buildingOffsetY + ')');
 
   // ground hatch
   paths.append('svg:path')
-      .attr('d', `M ${x(0)} ${y(GROUND.y)}
-            H ${x(GROUND.x) + offset}
-            V ${y(GROUND.y + 1)}
-            H ${x(GROUND.width + GROUND.x) + offset}
-            V ${y(GROUND.y)}
-            H ${x(surfaceMax) + 2 * offset}
-            V ${y(GROUND.y) + .5 * offset}
-            H ${x(GROUND.width + GROUND.x) + 1.5 * offset}
-            V ${y(GROUND.y + 1) + .5 * offset}
-            H ${x(GROUND.x) + .5 * offset}
-            V ${y(GROUND.y) + .5 * offset}
+      .attr('d', `M ${x(0)} ${y(infraY)}
+            H ${x(infraX) + groundOffset}
+            V ${y(infraY + infraHeight)}
+            H ${x(infraWidth + infraX) + groundOffset}
+            V ${y(infraY)}
+            H ${x(surfaceMax) + 2 * groundOffset}
+            V ${y(infraY) + .5 * groundOffset}
+            H ${x(infraWidth + infraX) + 1.5 * groundOffset}
+            V ${y(infraY + infraHeight) + .5 * groundOffset}
+            H ${x(infraX) + .5 * groundOffset}
+            V ${y(infraY) + .5 * groundOffset}
             H ${x(0)}
             Z`)
       .classed('ground-hatch', true);
 
   // underground hatch
   // paths.append('svg:path')
-  //     .attr('d', `M ${x(0)} ${y(GROUND.y) + .5 * offset}
-  //           H ${x(GROUND.x) + .5 * offset}
-  //           V ${y(GROUND.y + 1) + .5 * offset}
-  //           H ${x(GROUND.width + GROUND.x) + 1.5 * offset}
-  //           V ${y(GROUND.y) + .5 * offset}
-  //           H ${x(surfaceMax) + 2 * offset}
-  //           V ${y(GROUND.y + 2)}
+  //     .attr('d', `M ${x(0)} ${y(infraY) + .5 * groundOffset}
+  //           H ${x(infraX) + .5 * groundOffset}
+  //           V ${y(infraY + infraHeight) + .5 * groundOffset}
+  //           H ${x(infraWidth + infraX) + 1.5 * groundOffset}
+  //           V ${y(infraY) + .5 * groundOffset}
+  //           H ${x(surfaceMax) + 2 * groundOffset}
+  //           V ${y(infraY + infraHeight + 1)}
   //           H ${x(0)}
   //           Z`)
   //     .classed('underground-hatch', true);
 
   // ground cut
   paths.append('svg:path')
-      .attr('d', `M ${x(0)} ${y(GROUND.y)}
-                  H ${x(GROUND.x) + offset}
-                  V ${y(GROUND.y + 1)}
-                  H ${x(GROUND.width + GROUND.x) + offset}
-                  V ${y(GROUND.y)}
-                  H ${x(surfaceMax) + 2 * offset}`)
+      .attr('d', `M ${x(0)} ${y(infraY)}
+                  H ${x(infraX) + groundOffset}
+                  V ${y(infraY + infraHeight)}
+                  H ${x(infraWidth + infraX) + groundOffset}
+                  V ${y(infraY)}
+                  H ${x(surfaceMax) + 2 * groundOffset}`)
       .classed('ground-cut', true);
 
   // A container to hold the y-axis rules.

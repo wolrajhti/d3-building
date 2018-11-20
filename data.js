@@ -4,7 +4,7 @@
   for (var i = 0; i < 75; ++i) {
     data.push({
       typo: ['bur', 'pc', 'lt'][Math.floor(3 * Math.random())],
-      level: ['RdC', 'SS1', 'R+1', 'R+2', 'R+3'][Math.floor(5 * Math.random())],
+      level: ['RdC', 'SS2', 'SS1', 'R+1', 'R+2', 'R+3'][Math.floor(5 * Math.random())],
       surface: Math.round(10 * Math.random(), 2)
     });
   }
@@ -37,3 +37,5 @@
   var surfaceMax = d3.max(data.map(d => d.surface));
 
   var levelCount = data.length;
+
+  var projectName = 'Covéa 24 Prosny';

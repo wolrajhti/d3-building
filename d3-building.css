@@ -1,3 +1,9 @@
+.project-name {
+  font: 24px sans-serif;
+  font-weight: 580;
+  text-anchor: middle;
+}
+
 .level-line {
   stroke-width: 1px;
   stroke-opacity: 1;
@@ -22,11 +28,25 @@
 .room {
   fill-opacity: .6;
   stroke: #fff;
-  stroke-width: 3px;
+  stroke-width: 2px;
 }
 
 .room:hover {
   fill-opacity: .4;
+}
+
+.room-label {
+  font: 12px sans-serif;
+  font-weight: 500;
+  text-anchor: middle;
+  font-variant: all-small-caps;
+}
+
+.room-surface {
+  font: 8px sans-serif;
+  font-weight: 400;
+  text-anchor: middle;
+  font-style: italic;
 }
 
 .bur {
