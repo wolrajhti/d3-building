@@ -12,11 +12,13 @@
 <script>
   const w = 960;
   const h = 500;
-  const x = d3.scaleLinear().range([0, 0.8 * w]).domain([0, surfaceMax]);
-  const y = d3.scaleLinear().range([0, 0.8 * h]).domain([0, levelCount + 1]);
 
-  const buildingOffsetX = .1 * w;
+  const x = d3.scaleLinear().range([0, 0.76 * w]).domain([0, surfaceMax]);
+  const y = d3.scaleLinear().range([0, 0.8 * h]).domain([0, levelCount + 0.5]);
+
+  const buildingOffsetX = .12 * w;
   const buildingOffsetY = .1 * h;
+
   const infraY = data.findIndex(d => d.name === 'RdC') + 1;
   const infraWidth = data.filter((d, i) => i >= infraY)
     .reduce((surfaceMaxInfra, level) => Math.max(surfaceMaxInfra, level.surface), 0);
@@ -24,20 +26,58 @@
   const infraX = (surfaceMax - infraWidth) / 2;
   const infraHeight = data.length - infraY;
 
+  const textBorderOffset = 2;
+
+  const lineOffset = .05;
+
   // An SVG element with a bottom-right origin.
   var svg = d3.select('#chart')
     .append('svg:svg')
       .attr('width', w)
       .attr('height', h);
 
+  // A container to hold the y-axis rules.
+  var rules = svg.append('svg:g')
+  .attr('transform', 'translate(0,' + .1 * h + ')');
+
+  // Add rules for each level.
+  rules = rules.selectAll('g')
+    .data(data)
+  .enter().append('svg:g')
+    .attr('transform', function(d, i) { return 'translate(0,' + y(i + 1) + ')'; });
+
+  rules.append('svg:line')
+      .attr('x1', lineOffset * w)
+      .attr('x2', (1 - lineOffset) * w)
+      .classed('level-line', true);
+
+  rules.append('svg:text')
+      .attr('transform', 'translate(0,' + -y(0.5) + ')')
+      .attr('x', (1 - lineOffset) * w)
+      .attr('dy', '.35em')
+      .text(d => d.name)
+      .classed('level-label', true);
+
+  rules.append('svg:rect')
+      .attr('transform', 'translate(0,' + -y(0.5) + ')')
+      .attr('x', function(d) { return this.previousElementSibling.getBBox().x - textBorderOffset;})
+      .attr('y', function(d) { return this.previousElementSibling.getBBox().y - textBorderOffset;})
+      .attr('width', function(d) { return this.previousElementSibling.getBBox().width + 2 * textBorderOffset;})
+      .attr('height', function(d) { return this.previousElementSibling.getBBox().height + 2 * textBorderOffset;})
+      .classed('level-label-box', true)
+      .style('display', d => {
+        if (d.name !== 'RdC') {
+          return 'none';
+        }
+      });
+
   // A sliding container to hold the bars.
   var building = svg.append('svg:g')
-    .attr('transform', 'translate(' + buildingOffsetX + ',' + buildingOffsetY + ')')
-    .attr('id', 'building');
+    .attr('transform', 'translate(' + buildingOffsetX + ',' + buildingOffsetY + ')');
 
   var title = svg.append('svg:text')
     .attr('x', buildingOffsetX + x(surfaceMax) / 2)
-    .attr('y', y(1) / 2)
+    .attr('y', y(1) / 3)
     .classed('project-name', true)
     .text(projectName);
 
@@ -99,25 +139,25 @@
       .attr('height', 8)
     .append('path')
       .attr('d', 'M-1,1 l2,-2 M0,8 l8,-8 M7,9 l2,-2')
-      .style('stroke', 'black')
+      .style('stroke', '#222d32')
       .style('stroke-width', '1');
 
   var groundOffset = .025 * w;
   var paths = svg.append('svg:g')
-      .attr('transform', 'translate(' + (buildingOffsetX - groundOffset) + ',' + buildingOffsetY + ')');
+      .attr('transform', 'translate(0,' + buildingOffsetY + ')');
 
   // ground hatch
   paths.append('svg:path')
       .attr('d', `M ${x(0)} ${y(infraY)}
-            H ${x(infraX) + groundOffset}
+            H ${x(infraX) + buildingOffsetX}
             V ${y(infraY + infraHeight)}
-            H ${x(infraWidth + infraX) + groundOffset}
+            H ${x(infraWidth + infraX) + buildingOffsetX}
             V ${y(infraY)}
-            H ${x(surfaceMax) + 2 * groundOffset}
+            H ${w}
             V ${y(infraY) + .5 * groundOffset}
-            H ${x(infraWidth + infraX) + 1.5 * groundOffset}
+            H ${x(infraWidth + infraX) + buildingOffsetX + .5 * groundOffset}
             V ${y(infraY + infraHeight) + .5 * groundOffset}
-            H ${x(infraX) + .5 * groundOffset}
+            H ${x(infraX) + buildingOffsetX - .5 * groundOffset}
             V ${y(infraY) + .5 * groundOffset}
             H ${x(0)}
             Z`)
@@ -126,11 +166,11 @@
   // underground hatch
   // paths.append('svg:path')
   //     .attr('d', `M ${x(0)} ${y(infraY) + .5 * groundOffset}
-  //           H ${x(infraX) + .5 * groundOffset}
+  //           H ${x(infraX) + buildingOffsetX - .5 * groundOffset}
   //           V ${y(infraY + infraHeight) + .5 * groundOffset}
-  //           H ${x(infraWidth + infraX) + 1.5 * groundOffset}
+  //           H ${x(infraWidth + infraX) + buildingOffsetX + .5 * groundOffset}
   //           V ${y(infraY) + .5 * groundOffset}
-  //           H ${x(surfaceMax) + 2 * groundOffset}
+  //           H ${w}
   //           V ${y(infraY + infraHeight + 1)}
   //           H ${x(0)}
   //           Z`)
@@ -139,44 +179,12 @@
   // ground cut
   paths.append('svg:path')
       .attr('d', `M ${x(0)} ${y(infraY)}
-                  H ${x(infraX) + groundOffset}
+                  H ${x(infraX) + buildingOffsetX}
                   V ${y(infraY + infraHeight)}
-                  H ${x(infraWidth + infraX) + groundOffset}
+                  H ${x(infraWidth + infraX) + buildingOffsetX}
                   V ${y(infraY)}
-                  H ${x(surfaceMax) + 2 * groundOffset}`)
+                  H ${w}`)
       .classed('ground-cut', true);
-
-  // A container to hold the y-axis rules.
-  var rules = svg.append('svg:g')
-    .attr('transform', 'translate(0,' + .1 * h + ')');
-
-  // Add rules for each level.
-  rules = rules.selectAll('g')
-    .data(data)
-  .enter().append('svg:g')
-    .attr('transform', function(d, i) { return 'translate(0,' + y(i + 1) + ')'; });
-
-  rules.append('svg:line')
-      .attr('x1', .05 * w)
-      .attr('x2', .95 * w)
-      .classed('level-line', true);
-
-  rules.append('svg:text')
-      .attr('transform', 'translate(0,' + -y(0.5) + ')')
-      .attr('x', 0.96 * w)
-      .attr('dy', '.35em')
-      .text(d => d.name)
-      .classed('level-label', true);
-
-  const TEXT_BORDER_OFFSET = 2;
-
-  rules.append('svg:rect')
-      .attr('transform', 'translate(0,' + -y(0.5) + ')')
-      .attr('x', function(d) { return this.previousElementSibling.getBBox().x - TEXT_BORDER_OFFSET;})
-      .attr('y', function(d) { return this.previousElementSibling.getBBox().y - TEXT_BORDER_OFFSET;})
-      .attr('width', function(d) { return this.previousElementSibling.getBBox().width + 2 * TEXT_BORDER_OFFSET;})
-      .attr('height', function(d) { return this.previousElementSibling.getBBox().height + 2 * TEXT_BORDER_OFFSET;})
-      .classed('level-label-box', true);
 
   document.querySelectorAll('rect').forEach(node => {
     node.addEventListener('click', function() {

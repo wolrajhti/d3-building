@@ -4,7 +4,7 @@
   for (var i = 0; i < 75; ++i) {
     data.push({
       typo: ['bur', 'pc', 'lt'][Math.floor(3 * Math.random())],
-      level: ['RdC', 'SS2', 'SS1', 'R+1', 'R+2', 'R+3'][Math.floor(5 * Math.random())],
+      level: ['RdC', 'SS3', 'SS2', 'SS1', 'R+1', 'R+2', 'R+3', 'R+4', 'R+5'][Math.floor(7 * Math.random())],
       surface: Math.round(10 * Math.random(), 2)
     });
   }
