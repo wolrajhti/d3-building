@@ -1,0 +1,60 @@
+.rule line {
+  stroke-width: 1px;
+  stroke-opacity: 1;
+  stroke-dasharray: 20 5 3 5;
+  stroke-linecap: round;
+  stroke: #888;
+  shape-rendering: crispEdges;
+}
+
+.rule rect {
+  stroke-width: 1px;
+  stroke: #000;
+  shape-rendering: crispEdges;
+  fill: none;
+}
+
+.rule text {
+  font: 15px sans-serif;
+  font-weight: 580;
+}
+
+rect {
+  fill-opacity: .6;
+  stroke: #fff;
+  stroke-width: 3px;
+}
+
+rect:hover {
+  fill-opacity: .4;
+}
+
+.bur {
+  fill: #e377c2;
+}
+
+.pc {
+  fill: #1f77b4;
+}
+
+.lt {
+  fill: #7fb632;
+}
+
+path.ground-cut {
+  fill: none;
+  stroke-width: 3px;
+  stroke: #000;
+  stroke-linejoin: round;
+}
+
+path.ground-hatch {
+  fill-opacity: .75;
+  fill: url(#diagonalHatch);
+}
+
+path.underground-hatch {
+  fill-opacity: .5;
+  /* fill: url(#diagonalHatch); */
+  fill: #bbb;
+}
