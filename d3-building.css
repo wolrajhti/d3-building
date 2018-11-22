@@ -28,10 +28,10 @@
 }
 
 .room {
-  fill-opacity: 0.6;
+  fill-opacity: .8;
   stroke: #222d32;
   shape-rendering: crispEdges;
-  stroke-width: 1.5px;
+  stroke-width: 1px;
 }
 
 .room:hover {
@@ -55,15 +55,15 @@
 }
 
 .bur {
-  fill: #e377c2;
+  fill: #ffc8c8;
 }
 
 .pc {
-  fill: #1f77b4;
+  fill: #89b5dd;
 }
 
 .lt {
-  fill: #7fb632;
+  fill: #adcf82;
 }
 
 .ground-cut {

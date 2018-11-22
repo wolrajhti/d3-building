@@ -29,7 +29,7 @@
 
   const lineOffset = .05;
 
-  const wallOffset = 1.5;
+  const wallOffset = 2;
   const shadowOffset = 5;
 
   // An SVG element with a bottom-right origin.
@@ -95,41 +95,44 @@
           boy = 1;
         }
         
-        pos.splice(0, 0, (-wallOffset + x((surfaceMax - d.surface) / 2)).toFixed(0) + ' ' + (toy * wallOffset + y(i)).toFixed(0));
-        pos.push((wallOffset + x((surfaceMax + d.surface) / 2)).toFixed(0) + ' ' + (toy * wallOffset + y(i)).toFixed(0));
+        pos.splice(0, 0, (-wallOffset + x((surfaceMax - d.surface) / 2)).toFixed(2) + ' ' + (toy * wallOffset + y(i)).toFixed(2));
+        pos.push((wallOffset + x((surfaceMax + d.surface) / 2)).toFixed(2) + ' ' + (toy * wallOffset + y(i)).toFixed(2));
 
-        pos.splice(0, 0, (-wallOffset + x((surfaceMax - d.surface) / 2)).toFixed(0) + ' ' + (boy * wallOffset + y(i + 1)).toFixed(0));
-        pos.push((wallOffset + x((surfaceMax + d.surface) / 2)).toFixed(0) + ' ' + (boy * wallOffset + y(i + 1)).toFixed(0));
+        pos.splice(0, 0, (-wallOffset + x((surfaceMax - d.surface) / 2)).toFixed(2) + ' ' + (boy * wallOffset + y(i + 1)).toFixed(2));
+        pos.push((wallOffset + x((surfaceMax + d.surface) / 2)).toFixed(2) + ' ' + (boy * wallOffset + y(i + 1)).toFixed(2));
       });
       return 'M ' + pos.join(' L ') + ' Z';
     })();
   
   // WHITE + HATCH
-  // building.append('svg:path')
-  //   .style('fill', 'white')
-  //   .style('stroke', 'black')
-  //   .style('stroke-width', '0px')
-  //   .attr('d', buildingContourPath);
+  building.append('svg:path')
+    .style('fill', 'white')
+    .style('stroke', 'black')
+    .style('stroke-width', '0px')
+    .attr('d', buildingContourPath);
 
-  // building.append('svg:path')
-  //   .style('fill', 'url(#diagonalHatch)')
-  //   .style('stroke', 'black')
-  //   .style('stroke-width', '1.5px')
-  //   .attr('d', buildingContourPath);
+  building.append('svg:path')
+    .style('fill', 'url(#diagonalHatch)')
+    .style('stroke', 'black')
+    .style('stroke-width', '1px')
+    .style('shape-rendering', 'crispEdges')
+    .attr('d', buildingContourPath);
 
   // GREY
   // building.append('svg:path')
   //   .style('fill', '#ddd')
   //   .style('stroke', 'black')
   //   .style('stroke-width', '1.5px')
+  //   .style('shape-rendering', 'crispEdges')
   //   .attr('d', buildingContourPath);
 
   // WHITE
-  building.append('svg:path')
-    .style('fill', 'white')
-    .style('stroke', 'black')
-    .style('stroke-width', '1px')
-    .attr('d', buildingContourPath);
+  // building.append('svg:path')
+  //   .style('fill', 'white')
+  //   .style('stroke', 'black')
+  //   .style('stroke-width', '1px')
+  //   .style('shape-rendering', 'crispEdges')
+  //   .attr('d', buildingContourPath);
 
   var title = svg.append('svg:text')
     .attr('x', buildingOffsetX + x(surfaceMax) / 2)
@@ -212,25 +215,25 @@
   // A hatchPattern filling rects
   // from https://stackoverflow.com/questions/13069446/simple-fill-pattern-in-svg-diagonal-hatching
   // x8
-  var hatchPattern = svg.append('svg:pattern')
-      .attr('id', 'diagonalHatch')
-      .attr('patternUnits', 'userSpaceOnUse')
-      .attr('width', 8)
-      .attr('height', 8)
-    .append('path')
-      .attr('d', 'M-1,1 l2,-2 M0,8 l8,-8 M7,9 l2,-2')
-      .style('stroke', '#222d32')
-      .style('stroke-width', '1');
-  // x4
-  // svg.append('svg:pattern')
+  // var hatchPattern = svg.append('svg:pattern')
   //     .attr('id', 'diagonalHatch')
   //     .attr('patternUnits', 'userSpaceOnUse')
-  //     .attr('width', 4)
-  //     .attr('height', 4)
+  //     .attr('width', 8)
+  //     .attr('height', 8)
   //   .append('path')
-  //     .attr('d', 'M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2')
+  //     .attr('d', 'M-1,1 l2,-2 M0,8 l8,-8 M7,9 l2,-2')
   //     .style('stroke', '#222d32')
   //     .style('stroke-width', '1');
+  // x4
+  svg.append('svg:pattern')
+      .attr('id', 'diagonalHatch')
+      .attr('patternUnits', 'userSpaceOnUse')
+      .attr('width', 4)
+      .attr('height', 4)
+    .append('path')
+      .attr('d', 'M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2')
+      .style('stroke', '#222d32')
+      .style('stroke-width', '1');
   // xEARTH
   // var hatchPattern = svg.append('svg:pattern')
   //     .attr('id', 'earthHatch')
@@ -275,7 +278,7 @@
   hatchPattern.append('path').attr('d', 'M6,7 l13,13');
   hatchPattern.append('path').attr('d', 'M10,3 l13,13');
 
-  var groundOffset = .5 * w;
+  var groundOffset = .025 * w;
   var paths = svg.append('svg:g')
       .attr('transform', 'translate(0,' + (wallOffset + buildingOffsetY) + ')');
 
